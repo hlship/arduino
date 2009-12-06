@@ -87,8 +87,8 @@ boolean Debounce::read()
 // First press will move to the first LED.
 int currentLed = -1;
 
-Debounce advanceButton = Debounce(2);
-Debounce retreatButton = Debounce(3);
+Debounce nextButton = Debounce(2);
+Debounce prevButton = Debounce(3);
 
 LedController ledController[LED_COUNT] = {
   LedController(12),
@@ -111,7 +111,7 @@ void setup()
   }
 }
 
-void advance()
+void next()
 {
   if (currentLed >= 0)
     ledController[currentLed].display(false);
@@ -122,7 +122,7 @@ void advance()
   ledController[currentLed].display(true);
 }
 
-void retreat()
+void prev()
 {
   if (currentLed >= 0)
     ledController[currentLed].display(false);
@@ -135,9 +135,9 @@ void retreat()
 
 void loop()
 {
-  if (advanceButton.read()) advance();
+  if (nextButton.read()) next();
 
-  if (retreatButton.read()) retreat();
+  if (prevButton.read()) prev();
 }
 
 
