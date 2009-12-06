@@ -2,6 +2,9 @@
 #define LED_COUNT 4
 #define DEBOUNCE_PERIOD 50 // ms
 
+#define ANALOG_MIN 0
+#define ANALOG_MAX 255
+
 class LedController
 {
 public:
@@ -20,7 +23,7 @@ LedController::LedController(int pin)
 
 void LedController::display(boolean light)
 {
-  digitalWrite(_pin, light ? HIGH : LOW);
+  analogWrite(_pin, light ? ANALOG_MAX : ANALOG_MIN + 10);
 }
 
 // --------------------------------------
