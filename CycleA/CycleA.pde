@@ -2,6 +2,29 @@
 #define LED_COUNT 4
 #define DEBOUNCE_PERIOD 50 // ms
 
+class LedController
+{
+public:
+  LedController(int pin);
+  void display(boolean light);
+private:
+  int _pin;
+};
+
+LedController::LedController(int pin)
+{
+  _pin = pin;
+  
+  pinMode(_pin, OUTPUT);
+}
+
+void LedController::display(boolean light)
+{
+  digitalWrite(_pin, light ? HIGH : LOW);
+}
+
+// --------------------------------------
+
 class Debounce
 {
 public:
@@ -59,48 +82,55 @@ boolean Debounce::read()
   return false;
 }
 
+// --------------------------------------
+
 // First press will move to the first LED.
 int currentLed = -1;
 
 Debounce advanceButton = Debounce(2);
 Debounce retreatButton = Debounce(3);
 
+LedController ledController[LED_COUNT] = {
+  LedController(12),
+  LedController(11),
+  LedController(10),
+  LedController(9) };
+  
+
 void setup()
 {
   for (int i = 0; i < LED_COUNT; i++) {
-    int pin = FIRST_LED - i;
-    pinMode(pin, OUTPUT);
-    digitalWrite(pin, HIGH);
+    ledController[i].display(true);
   }
 
   delay(250);
 
   for (int i = 0; i < LED_COUNT; i++)
   {
-    digitalWrite(FIRST_LED - i, LOW);
+    ledController[i].display(false);
   }
 }
 
 void advance()
 {
   if (currentLed >= 0)
-    digitalWrite(FIRST_LED - currentLed, LOW);
+    ledController[currentLed].display(false);
 
   if (++currentLed == LED_COUNT)
     currentLed = 0;
 
-  digitalWrite(FIRST_LED - currentLed, HIGH);
+  ledController[currentLed].display(true);
 }
 
 void retreat()
 {
   if (currentLed >= 0)
-    digitalWrite(FIRST_LED - currentLed, LOW);
+    ledController[currentLed].display(false);
 
   if (--currentLed < 0)
     currentLed = LED_COUNT - 1;
 
-  digitalWrite(FIRST_LED - currentLed, HIGH);
+  ledController[currentLed].display(true);
 }
 
 void loop()
