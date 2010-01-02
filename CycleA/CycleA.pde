@@ -16,7 +16,7 @@ class LedController
 public:
   LedController(int pin);
   LedController display(boolean light);
-  /** Interrupte current animation, animate to the target value form the current value. */
+  /** Interrupt current animation, animate to the target value form the current value. */
   LedController animateTo(int target);
   LedController callAtEnd(handler_t *handler);
   void doAnimate();
@@ -48,14 +48,14 @@ LedController LedController::animateTo(int target)
   _targetValue = target;
   _animating = true;
   _handler = NULL;
-  
+
   return *this;
 }
 
 LedController LedController::callAtEnd(handler_t *handler)
 {
   _handler = handler;
-  
+
   return *this;
 }
 
@@ -68,7 +68,7 @@ void LedController::doAnimate()
   if (ellapsed >= ANIMATION_PERIOD) {
     _animating = false;
     _currentValue = _targetValue;
-    
+
     // If an end-of-animation handler was specified, call it now.
     if (_handler != NULL) {
       (*_handler)();
@@ -156,11 +156,11 @@ int currentLed = -1;
 Debounce nextButton = Debounce(2);
 Debounce prevButton = Debounce(3);
 
-LedController ledController[LED_COUNT] = {
-  LedController(12),
+LedController ledController[LED_COUNT] = {  
   LedController(11),
   LedController(10),
-  LedController(9) };
+  LedController(9),
+  LedController(8)};
 
 void dimTheLights()
 {
@@ -172,7 +172,7 @@ void dimTheLights()
 void setup()
 {
   Serial.begin(57600);
-  
+
   ledController[0].callAtEnd(&dimTheLights);
 }
 
@@ -213,6 +213,9 @@ void loop()
 
   if (prevButton.read()) prev();
 }
+
+
+
 
 
 
