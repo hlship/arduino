@@ -90,13 +90,13 @@ LedController LedController::display(boolean light)
 
 // --------------------------------------
 
-class Debounce
+class ButtonController
 {
 public:
   /* The handler gets invoked on button press (or button repeat). Perhaps we should have seperate
    handlers for those cases. I like having a no-arguments function ... but we may need to pass
    the pin number or some other identifier. */
-  Debounce(int pin, handler_t *handler);
+  ButtonController(int pin, handler_t *handler);
   /* Read the pin and decide whether to invoke the handler or not. */
   void read();
 private:
@@ -108,7 +108,7 @@ private:
   handler_t* _handler;
 };
 
-Debounce::Debounce(int pin, handler_t *handler)
+ButtonController::ButtonController(int pin, handler_t *handler)
 {
   _pin = pin;
   _previousValue = LOW;
@@ -120,7 +120,7 @@ Debounce::Debounce(int pin, handler_t *handler)
   pinMode(_pin, INPUT);  
 }
 
-void Debounce::read()
+void ButtonController::read()
 {
   int currentValue = digitalRead(_pin);
 
@@ -213,8 +213,8 @@ void animateAll()
   }
 }
 
-Debounce nextButton = Debounce(2, &next);
-Debounce prevButton = Debounce(3, &prev);
+ButtonController nextButton = ButtonController(2, &next);
+ButtonController prevButton = ButtonController(3, &prev);
 
 void setup()
 {
