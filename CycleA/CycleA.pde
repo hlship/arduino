@@ -1,5 +1,6 @@
 #define LED_COUNT 4
-#define DEBOUNCE_PERIOD 50 // ms
+#define DEBOUNCE_PERIOD 10 // ms
+#define REPEAT_INTERVAL 100 // ms
 
 #define ANALOG_MIN 0
 #define ANALOG_MAX 200
@@ -76,7 +77,6 @@ void LedController::doAnimate()
   }
   else
   {
-    // TODO: Sinosoidal!
     _currentValue = map(ellapsed, 0, ANIMATION_PERIOD, _startValue, _targetValue);
   }
 
@@ -103,6 +103,7 @@ private:
   int _pin;
   int _previousValue;
   int _lastButtonDebounce;
+  int _lastNotification;
   boolean _enabled;
   handler_t* _handler;
 };
@@ -112,6 +113,7 @@ Debounce::Debounce(int pin, handler_t *handler)
   _pin = pin;
   _previousValue = LOW;
   _lastButtonDebounce = 0; // never
+  _lastNotification = 0; // never
   _enabled = true;
   _handler = handler;
 
@@ -131,24 +133,35 @@ void Debounce::read()
     return;
   }
 
+  // Wait until the read off of the pin is stable for the DEBOUNCE_PERIOD before
+  // continuing.
+  
   if (now - _lastButtonDebounce < DEBOUNCE_PERIOD) {
     return;
   }
 
 
-  // It's gone HIGH to LOW
+  // It's gone HIGH to LOW.  If it goes HIGH again
+  // we can invoke the handler.
 
   if (currentValue == LOW) {
     _enabled = true;
     return;
   }
 
-  // It's gone LOW to HIGH
+  // It's gone LOW to HIGH, or it's been held down and we're
+  // repeating.
 
-  if (_enabled) {
-    _enabled = false;
-
+  if (_enabled || now - _lastNotification >= REPEAT_INTERVAL) {
+    
+    // Invoke the handler.
+    
     (*_handler)();
+    
+    // Note the last time we invoke the handler and disable it
+    // until a changte
+    _lastNotification = now;
+    _enabled = false;
   }
 }
 
