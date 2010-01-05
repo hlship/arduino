@@ -1,6 +1,6 @@
 #define LED_COUNT 4
-#define DEBOUNCE_PERIOD 10 // ms
-#define REPEAT_INTERVAL 100 // ms
+#define DEBOUNCE_PERIOD 20 // ms
+#define REPEAT_INTERVAL 150 // ms
 
 #define ANALOG_MIN 0
 #define ANALOG_MAX 200
@@ -63,7 +63,7 @@ void LedController::doAnimate()
 {  
   if (!_animating) return;
 
-  int ellapsed = millis() - _animStart;
+  unsigned long ellapsed = millis() - _animStart;
 
   if (ellapsed >= ANIMATION_PERIOD) {
     _animating = false;
@@ -102,8 +102,8 @@ public:
 private:
   int _pin;
   int _previousValue;
-  int _lastButtonDebounce;
-  int _lastNotification;
+  unsigned long _lastButtonDebounce;
+  unsigned long _lastNotification;
   boolean _enabled;
   handler_t* _handler;
 };
@@ -124,7 +124,7 @@ void Debounce::read()
 {
   int currentValue = digitalRead(_pin);
 
-  long now = millis();
+  unsigned long now = millis();
 
   if (currentValue != _previousValue)
   {
