@@ -1,4 +1,3 @@
-#define FIRST_LED 12
 #define LED_COUNT 4
 #define DEBOUNCE_PERIOD 50 // ms
 
@@ -24,7 +23,7 @@ private:
   int _currentValue; // PWM: 0-255
   int _startValue; // PWM: 0-255
   int _targetValue; // PWM: 0-255
-  unsigned long _animStart; // millis
+  unsigned long _animStart; // timestamp millis
   handler_t* _handler;
   int _pin;
   boolean _animating;
@@ -94,26 +93,32 @@ LedController LedController::display(boolean light)
 class Debounce
 {
 public:
-  Debounce(int pin);
-  boolean read();
+  /* The handler gets invoked on button press (or button repeat). Perhaps we should have seperate
+   handlers for those cases. I like having a no-arguments function ... but we may need to pass
+   the pin number or some other identifier. */
+  Debounce(int pin, handler_t *handler);
+  /* Read the pin and decide whether to invoke the handler or not. */
+  void read();
 private:
   int _pin;
   int _previousValue;
   int _lastButtonDebounce;
   boolean _enabled;
+  handler_t* _handler;
 };
 
-Debounce::Debounce(int pin)
+Debounce::Debounce(int pin, handler_t *handler)
 {
   _pin = pin;
   _previousValue = LOW;
   _lastButtonDebounce = 0; // never
   _enabled = true;
+  _handler = handler;
 
   pinMode(_pin, INPUT);  
 }
 
-boolean Debounce::read()
+void Debounce::read()
 {
   int currentValue = digitalRead(_pin);
 
@@ -123,11 +128,11 @@ boolean Debounce::read()
   {
     _lastButtonDebounce = now;
     _previousValue = currentValue;
-    return false;
+    return;
   }
 
   if (now - _lastButtonDebounce < DEBOUNCE_PERIOD) {
-    return false;
+    return;
   }
 
 
@@ -135,17 +140,16 @@ boolean Debounce::read()
 
   if (currentValue == LOW) {
     _enabled = true;
-    return false;
+    return;
   }
 
   // It's gone LOW to HIGH
 
   if (_enabled) {
     _enabled = false;
-    return true;
-  }
 
-  return false;
+    (*_handler)();
+  }
 }
 
 // --------------------------------------
@@ -153,14 +157,11 @@ boolean Debounce::read()
 // First press will move to the first LED.
 int currentLed = -1;
 
-Debounce nextButton = Debounce(2);
-Debounce prevButton = Debounce(3);
-
 LedController ledController[LED_COUNT] = {  
   LedController(11),
   LedController(10),
   LedController(9),
-  LedController(8)};
+  LedController(6)};
 
 void dimTheLights()
 {
@@ -169,12 +170,6 @@ void dimTheLights()
   }
 }
 
-void setup()
-{
-  Serial.begin(57600);
-
-  ledController[0].callAtEnd(&dimTheLights);
-}
 
 void next()
 {
@@ -205,14 +200,27 @@ void animateAll()
   }
 }
 
+Debounce nextButton = Debounce(2, &next);
+Debounce prevButton = Debounce(3, &prev);
+
+void setup()
+{
+  Serial.begin(57600);
+
+  ledController[0].callAtEnd(&dimTheLights);
+}
+
+
 void loop()
 {
   animateAll();
 
-  if (nextButton.read()) next();
-
-  if (prevButton.read()) prev();
+  nextButton.read();
+  prevButton.read();
 }
+
+
+
 
 
 
