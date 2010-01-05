@@ -206,13 +206,6 @@ void prev()
   ledController[currentLed].display(true);
 }
 
-void animateAll()
-{
-  for (int i = 0; i < LED_COUNT; i++) {
-    ledController[i].doAnimate();
-  }
-}
-
 ButtonController nextButton = ButtonController(2, &next);
 ButtonController prevButton = ButtonController(3, &prev);
 
@@ -226,7 +219,9 @@ void setup()
 
 void loop()
 {
-  animateAll();
+  for (int i = 0; i < LED_COUNT; i++) {
+    ledController[i].doAnimate();
+  }
 
   nextButton.read();
   prevButton.read();
