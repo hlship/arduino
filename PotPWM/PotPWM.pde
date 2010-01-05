@@ -129,23 +129,50 @@ void setup()
 {
   Serial.begin(57600);
 
-  // ledController[0].callAtEnd(&dimTheLights);
+  ledController[0].callAtEnd(&dimTheLights);
 }
 
+long lastChange = millis();
 
 void loop()
 {
-//  for (int i = 0; i < LED_COUNT; i++) {
-//    ledController[i].doAnimate();
-//  }
-  
+  for (int i = 0; i < LED_COUNT; i++) {
+    ledController[i].doAnimate();  
+  }
+
+  // Scaled 0..1023
   int potValue = analogRead(0);
   
   Serial.println(potValue);
   
-  analogWrite(9, potValue >> 2);
+
+  boolean direction = potValue >= 512;
   
+  long scaled = direction ? 
+  2 * potValue - 512
+  : potValue;
+
+  long delay = 10 * scaled;
+
+  long now = millis();
+
+  if (lastChange + delay >= now) {
+
+    if (direction) {
+      Serial.println("+");
+      next();
+    }
+    else {
+      Serial.println("-");
+      prev();
+    }
+    
+    lastChange = now;
+  }
 }
+
+
+
 
 
 
